@@ -55,18 +55,49 @@ def make_new_student(first_name, last_name, github):
     print "Successfully added student: %s %s" % (first_name, last_name)
 
 
-def project_by_title():
-    """query to list projects by title
-    - Project Table"""
+def project_by_title(project_title):
+    """User inputs project_title, function queries DB for that project"""
+
+    QUERY = """SELECT title, description 
+            FROM Projects 
+            WHERE title = ?"""
+
+    db_cursor.execute(QUERY, (project_title,))
+
+    answer = db_cursor.fetchone() 
+    
+    print answer[0], ":", answer[1]
+    # print "Title: %s, Description: %s" % answer[0], answer[1]
+
+
 
 def student_grade(github, project_title):
     """list a student's grade for the project, by github name
     JOINing Project table and Grades table"""
 
-def grade():
+    QUERY= """SELECT grade
+        FROM Grades 
+        WHERE student_github = ? AND project_title = ?"""
+    
+
+    db_cursor.execute(QUERY, (github, project_title))
+
+    grade_value = db_cursor.fetchone()
+
+    print "%s's grade for %s: %s" % (github, project_title, grade_value)
+
+def set_grade(github, project_title, grade_value):
     """...Update with a grade
     This would go in the grades table"""
+    
+    QUERY = """INSERT INTO Grades VALUES (?, ?, ?)"""
+   
+    db_cursor.execute(QUERY, (github, project_title, grade_value))
+    db_connection.commit()
 
+   
+    # print "%s %s's grade: %s" % (first_name, last_name, grade)
+    print "Successfully graded %s on Project %s: %s" % (github, project_title, grade_value)
 
 
 def handle_input():
@@ -90,6 +121,17 @@ def handle_input():
         elif command == "new_student":
             first_name, last_name, github = args   # unpack!
             make_new_student(first_name, last_name, github)
+
+        elif command == "project":
+                project_by_title(args[0]) 
+
+        elif command == "gradequery":
+            github, project_title = args
+            student_grade(github, project_title)
+
+        elif command == "entergrade":
+            github, project_title, grade_value = args
+            set_grade(github, project_title, grade_value)
 
 
 if __name__ == "__main__":
